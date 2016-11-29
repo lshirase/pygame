@@ -37,8 +37,7 @@ current_color = 0
 current_colorcount = 9
 
 
-# goodsound = pygame.mixer.Sound('good.wav')
-
+	
 
 INTRO = 0
 PLAYING = 1
@@ -49,15 +48,15 @@ game = INTRO
 
 images = ( pygame.image.load(os.path.join('backgrounds', 'first.png')), pygame.image.load(os.path.join('backgrounds', 'main.png')), pygame.image.load(os.path.join('backgrounds', 'lose.png')), pygame.image.load(os.path.join('backgrounds', 'youwon.png')))
 
+
 play = True
 
 def main():
-	global game, current_x, current_y, current_speed, play, current_width, current_level, current_color, current_colorcount
-	# pygame.mixer.init()
+	global game, current_x, current_y, current_speed, play, current_width, current_level, current_color, current_colorcount, goodsound
 	pygame.init()
+	pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=4096)
 	screen = pygame.display.set_mode( SCREEN_SIZE )
-	# goodsound = pygame.mixer.Sound(os.path.join('sounds','good.wav'))
-	
+
 	
 	reset_game()
 
@@ -97,14 +96,17 @@ def reset_game():
 
 def key_hit():
 	global play, game, current_x, current_y, current_width, current_speed, current_level
-	
+	goodsound = pygame.mixer.Sound(os.path.join('sounds', 'good.ogg'))
+	tempwidth = current_width
 	if game == PLAYING:
 		if current_y < BOARD_HEIGHT - 1:
 			for x in range(current_x, current_x + current_width):
 				if board[x][current_y + 1] == 0: # If they're standing on a block that did not work
 					current_width -= 1 # Then next time, give them one less block
 					board[x][current_y] = 0 # Also, get rid of this block that isn't standing on solid ground.
-		# goodsound.play()
+		##plays a good sound if player doesn't lose a block
+		if current_width == tempwidth:
+			goodsound.play()
 		current_y -= 1
 		current_level += 1
 		game_status()
