@@ -5,6 +5,9 @@ from pygame.mixer import *
 from backgrounds import *
 import os
 
+##SONG CREDIT - EDU TEODORO - 420 (MACINTOSH PLUS) - SEGA GENESIS REMIX
+##LINK TO SONG - https://soundcloud.com/edu-teodoro/420-macintosh-plus-sega-genesis-remix
+
 BOARD_WIDTH = 12 
 BOARD_HEIGHT = 20
 BOARD_SIZE = BOARD_WIDTH, BOARD_HEIGHT
@@ -31,6 +34,7 @@ board = []
 direction = 1
 current_x = 0
 current_y = BOARD_HEIGHT - 1
+old_y = current_y
 current_width = 3
 current_level = 0
 current_color = 0
@@ -56,6 +60,8 @@ def main():
 	pygame.init()
 	pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=4096)
 	screen = pygame.display.set_mode( SCREEN_SIZE )
+	pygame.mixer.music.load(os.path.join('sounds', 'soundtrack.ogg'))
+	pygame.mixer.music.play(-1)
 
 	
 	reset_game()
@@ -97,6 +103,8 @@ def reset_game():
 def key_hit():
 	global play, game, current_x, current_y, current_width, current_speed, current_level
 	goodsound = pygame.mixer.Sound(os.path.join('sounds', 'good.ogg'))
+	badsound = pygame.mixer.Sound(os.path.join('sounds', 'bad.ogg'))
+	losesound = pygame.mixer.Sound(os.path.join('sounds', 'lose.ogg'))
 	tempwidth = current_width
 	if game == PLAYING:
 		if current_y < BOARD_HEIGHT - 1:
@@ -107,9 +115,13 @@ def key_hit():
 		##plays a good sound if player doesn't lose a block
 		if current_width == tempwidth:
 			goodsound.play()
+		else:
+			badsound.play()
 		current_y -= 1
 		current_level += 1
 		game_status()
+		if game == LOSE:
+			losesound.play()
 	elif game == INTRO:
 		game = PLAYING
 	elif game == LOSE:
@@ -180,24 +192,44 @@ def draw_tile(screen, x, y):
 	global current_color, current_colorcount
 	col = (255,0,0)
 
-	if current_color == 0 and current_colorcount == 9:
-		col = TILE_COLOR_LIST[current_color] 
-		current_color = current_color + 1
-		current_colorcount = current_colorcount - 1
+	if y == BOARD_HEIGHT - 1:
+		col = TILE_COLOR_LIST[0]
+	elif y == BOARD_HEIGHT - 2:
+		col = TILE_COLOR_LIST[1]
+	elif y == BOARD_HEIGHT - 3:
+		col = TILE_COLOR_LIST[2]
+	elif y == BOARD_HEIGHT - 4:
+		col = TILE_COLOR_LIST[3]
+	elif y == BOARD_HEIGHT - 5:
+		col = TILE_COLOR_LIST[4]
+	elif y == BOARD_HEIGHT - 6:
+		col = TILE_COLOR_LIST[5]
+	elif y == BOARD_HEIGHT - 7:
+		col = TILE_COLOR_LIST[6]
+	elif y == BOARD_HEIGHT - 8:
+		col = TILE_COLOR_LIST[7]
+	elif y == BOARD_HEIGHT - 9:
+		col = TILE_COLOR_LIST[8]
+	elif y == BOARD_HEIGHT - 5:
+		col = TILE_COLOR_LIST[4]	
+	# if current_color == 0 and current_colorcount == 9:
+	# 	col = TILE_COLOR_LIST[current_color] 
+	# 	current_color = current_color + 1
+	# 	current_colorcount = current_colorcount - 1
 
-	elif current_color < 8 and current_colorcount > 0:
-		col = TILE_COLOR_LIST[current_color]
-		current_color = current_color + 1
-		current_colorcount = current_colorcount - 1
+	# elif current_color < 8 and current_colorcount > 0:
+	# 	col = TILE_COLOR_LIST[current_color]
+	# 	current_color = current_color + 1
+	# 	current_colorcount = current_colorcount - 1
 
-	elif current_color == 8 and current_colorcount == 0:
-		col = TILE_COLOR_LIST[current_color]
-		current_color = current_color - 1
-		current_colorcount = current_colorcount + 1
-	elif current_color > 0 and current_colorcount < 8:
-		col = TILE_COLOR_LIST[current_color]
-		current_color = current_color - 1
-		current_colorcount = current_colorcount + 1
+	# elif current_color == 8 and current_colorcount == 0:
+	# 	col = TILE_COLOR_LIST[current_color]
+	# 	current_color = current_color - 1
+	# 	current_colorcount = current_colorcount + 1
+	# elif current_color > 0 and current_colorcount < 8:
+	# 	col = TILE_COLOR_LIST[current_color]
+	# 	current_color = current_color - 1
+	# 	current_colorcount = current_colorcount + 1
 
 	pygame.draw.rect(screen, col, (x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
 	pygame.draw.rect(screen, (0, 0, 0), (x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT), 2)
