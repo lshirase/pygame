@@ -1,30 +1,36 @@
-import data
+import backgrounds
 import pygame
 from pygame.locals import *
-from data import *
+from backgrounds import *
 import os
 
-BOARD_SIZE = BOARD_WIDTH, BOARD_HEIGHT = 12, 20
-SCREEN_SIZE = SCREEN_WIDTH, SCREEN_HEIGHT = 240, 400
-TILE_SIZE = TILE_WIDTH, TILE_HEIGHT = SCREEN_WIDTH / BOARD_WIDTH, SCREEN_HEIGHT / BOARD_HEIGHT
+BOARD_WIDTH = 12 
+BOARD_HEIGHT = 20
+BOARD_SIZE = BOARD_WIDTH, BOARD_HEIGHT
+SCREEN_WIDTH = 240
+SCREEN_HEIGHT = 400
+SCREEN_SIZE = SCREEN_WIDTH, SCREEN_HEIGHT 
+TILE_WIDTH = SCREEN_WIDTH / BOARD_WIDTH
+TILE_HEIGHT = SCREEN_HEIGHT / BOARD_HEIGHT
+TILE_SIZE = TILE_WIDTH, TILE_HEIGHT
 
-TILE_COLOR = (255, 204, 255)
+
 TILE_COLOR_LIST = [(255, 204, 255), (253, 209, 254), (252, 215, 253), (251, 221, 253), (250, 226, 252), (249, 232, 252), (248, 238, 251), (247, 243, 251
-), (246, 249, 250), (245, 255, 250)]
+), (246, 249, 250)]
 
 
 LEVEL_SPEED = ( 80, 80, 75, 75, 70, 70, 65, 60, 55, 50,
 				45, 40, 35, 30, 32 )
-MAX_WIDTH = (3, 3, 3, 3, 2, 2, 2, 2, 1, 1,
-				1, 1, 1, 1, 1)
+
 				
-COLOR_CHANGE_Y = 10 # The block below which are displayed in the alternate color
 WIN_LEVEL = 15
 
 current_speed = 50 # Current tile speed in milliseconds
 board = []
-current_direction = 1
-current_x, current_y, current_width = 0, BOARD_HEIGHT - 1, 3
+direction = 1
+current_x = 0
+current_y = BOARD_HEIGHT - 1
+current_width = 3
 current_level = 0
 current_color = 0
 current_colorcount = 9
@@ -34,28 +40,29 @@ PLAYING = 1
 LOSE = 2
 WIN = 3
 
-game_state = INTRO
+game = INTRO
 
-bg_images = ( pygame.image.load(os.path.join('data', 'intro.png')), pygame.image.load(os.path.join('data', 'game.png')), pygame.image.load(os.path.join('data', 'lose.png')), pygame.image.load(os.path.join('data', 'win.png')))
+images = ( pygame.image.load(os.path.join('backgrounds', 'first.png')), pygame.image.load(os.path.join('backgrounds', 'main.png')), pygame.image.load(os.path.join('backgrounds', 'lose.png')), pygame.image.load(os.path.join('backgrounds', 'youwon.png')))
 
-keep_running = True
+play = True
 
 def main():
-	global game_state, current_x, current_y, current_speed, keep_running, current_width, current_level
+	global game, current_x, current_y, current_speed, play, current_width, current_level, current_color, current_colorcount
 	
 	pygame.init()
 	screen = pygame.display.set_mode( SCREEN_SIZE )	
 	
 	reset_game()
 
-	while(keep_running):
+
+	while(play):
 		update_movement()
 		update_board_info()
 		update_screen(screen)
 		
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT: 
-				keep_running = False
+				play = False
 			elif event.type == KEYDOWN:
 				if event.key == K_SPACE:
 					key_hit()
@@ -66,13 +73,13 @@ def main():
 					if (current_width >= BOARD_WIDTH): current_width = BOARD_WIDTH - 1
 
 def reset_game():
-	global game_state, current_x, current_y, current_speed, keep_running, current_width, current_level
+	global game, current_x, current_y, current_speed, play, current_width, current_level
 
 	clear_board()
 	
-	keep_running = True
+	play = True
 	
-	game_state = INTRO
+	game = INTRO
 	
 	current_x = 0
 	current_y = BOARD_HEIGHT - 1
@@ -80,10 +87,11 @@ def reset_game():
 	current_speed = LEVEL_SPEED[current_level]
 	current_width = 3
 
+
 def key_hit():
-	global keep_running, game_state, current_x, current_y, current_width, current_speed, current_level
+	global play, game, current_x, current_y, current_width, current_speed, current_level
 	
-	if game_state == PLAYING:
+	if game == PLAYING:
 		if current_y < BOARD_HEIGHT - 1:
 			for x in range(current_x, current_x + current_width):
 				if board[x][current_y + 1] == 0: # If they're standing on a block that did not work
@@ -91,53 +99,59 @@ def key_hit():
 					board[x][current_y] = 0 # Also, get rid of this block that isn't standing on solid ground.
 		current_y -= 1
 		current_level += 1
-		check_win_lose()
-	elif game_state == INTRO:
-		game_state = PLAYING
-	elif game_state == LOSE:
+		game_status()
+	elif game == INTRO:
+		game = PLAYING
+	elif game == LOSE:
 		reset_game()
-		game_state = INTRO
+		game = INTRO
 	else:
-		keep_running = False
+		play = False
 
-def check_win_lose():
-	global game_state, current_width, current_level, current_speed, keep_running, TILE_COLOR
+def game_status():
+	global game, current_width, current_level, current_speed, play, TILE_COLOR
 	
 	if current_width == 0:
-		game_state = LOSE
-	elif current_level == WIN_LEVEL:
-		game_state = WIN
+		game = LOSE
+	# elif current_level == WIN_LEVEL:
+	# 	game = WIN
 	else:
 		current_speed = LEVEL_SPEED[current_level]
 
 
 last_time = 0
 def update_movement():
-	global game_state, last_time, current_x, current_y, current_width, current_speed, current_direction
+	global game, last_time, current_x, current_y, current_width, current_speed, direction
 
-	if game_state == PLAYING:
+	if game == PLAYING:
 		current_time = pygame.time.get_ticks()
 		if (last_time + current_speed <= current_time):
-			new_x = current_x + current_direction
+			new_x = current_x + direction
 			if (new_x < 0) or (new_x + current_width > BOARD_WIDTH):
-				current_direction = -current_direction
+				direction = -direction
 			
-			current_x += current_direction
+			current_x += direction
 			
 			last_time = current_time
 		
 def update_screen(screen):
-	global game_state
+	global game
 
-	screen.blit(bg_images[game_state], (0,0,SCREEN_WIDTH,SCREEN_HEIGHT), (0,0,SCREEN_WIDTH,SCREEN_HEIGHT))
+	screen.blit(images[game], (0,0,SCREEN_WIDTH,SCREEN_HEIGHT), (0,0,SCREEN_WIDTH,SCREEN_HEIGHT))
 
-	if game_state == PLAYING:
+	if game == PLAYING:
+		if current_y < SCREEN_HEIGHT - 3:
+			screen.blit(images[game], (0,0,SCREEN_WIDTH,SCREEN_HEIGHT - 10), (0,0,SCREEN_WIDTH,SCREEN_HEIGHT - 10))
 		draw_board(screen)
-	elif game_state == INTRO:
+		
+		# pygame.draw.rect(screen, col, (4 * TILE_WIDTH, BOARD_HEIGHT -3 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
+		# pygame.draw.rect(screen, (0, 0, 0), (4 * TILE_WIDTH, BOARD_HEIGHT -3 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT), 2)
+
+	elif game == INTRO:
 		pass
-	elif game_state == LOSE:
+	elif game == LOSE:
 		pass
-	elif game_state == WIN:
+	elif game == WIN:
 		pass
 	
 	pygame.display.flip()
@@ -153,20 +167,24 @@ def draw_board(screen):
 				draw_tile(screen, x, y)
 			
 def draw_tile(screen, x, y):
-	global current_color
-	global current_colorcount
-	col = TILE_COLOR_LIST[current_color] 
+	global current_color, current_colorcount
+	col = (255,0,0)
+
 	if current_color == 0 and current_colorcount == 9:
 		col = TILE_COLOR_LIST[current_color] 
 		current_color = current_color + 1
 		current_colorcount = current_colorcount - 1
 
-	elif current_color > 9 and current_colorcount > 0:
+	elif current_color < 8 and current_colorcount > 0:
 		col = TILE_COLOR_LIST[current_color]
 		current_color = current_color + 1
 		current_colorcount = current_colorcount - 1
 
-	elif current_color == 9 and current_colorcount == 0:
+	elif current_color == 8 and current_colorcount == 0:
+		col = TILE_COLOR_LIST[current_color]
+		current_color = current_color - 1
+		current_colorcount = current_colorcount + 1
+	elif current_color > 0 and current_colorcount < 8:
 		col = TILE_COLOR_LIST[current_color]
 		current_color = current_color - 1
 		current_colorcount = current_colorcount + 1
