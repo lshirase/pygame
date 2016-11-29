@@ -1,8 +1,3 @@
-'''Game main module.
-
-Last Day Game Entry, by Clint Herron
-'''
-
 import data
 import pygame
 from pygame.locals import *
@@ -14,7 +9,9 @@ SCREEN_SIZE = SCREEN_WIDTH, SCREEN_HEIGHT = 240, 400
 TILE_SIZE = TILE_WIDTH, TILE_HEIGHT = SCREEN_WIDTH / BOARD_WIDTH, SCREEN_HEIGHT / BOARD_HEIGHT
 
 TILE_COLOR = (255, 204, 255)
-TILE_COLOR_ALT = (204, 204, 255)
+TILE_COLOR_LIST = [(255, 204, 255), (253, 209, 254), (252, 215, 253), (251, 221, 253), (250, 226, 252), (249, 232, 252), (248, 238, 251), (247, 243, 251
+), (246, 249, 250), (245, 255, 250)]
+
 
 LEVEL_SPEED = ( 80, 80, 75, 75, 70, 70, 65, 60, 55, 50,
 				45, 40, 35, 30, 32 )
@@ -29,6 +26,8 @@ board = []
 current_direction = 1
 current_x, current_y, current_width = 0, BOARD_HEIGHT - 1, 3
 current_level = 0
+current_color = 0
+current_colorcount = 9
 
 INTRO = 0
 PLAYING = 1
@@ -79,7 +78,7 @@ def reset_game():
 	current_y = BOARD_HEIGHT - 1
 	current_level = 0
 	current_speed = LEVEL_SPEED[current_level]
-	current_width = MAX_WIDTH[current_level]
+	current_width = 3
 
 def key_hit():
 	global keep_running, game_state, current_x, current_y, current_width, current_speed, current_level
@@ -110,8 +109,7 @@ def check_win_lose():
 		game_state = WIN
 	else:
 		current_speed = LEVEL_SPEED[current_level]
-		if current_width > MAX_WIDTH[current_level]:
-			current_width = MAX_WIDTH[current_level]
+
 
 last_time = 0
 def update_movement():
@@ -155,9 +153,24 @@ def draw_board(screen):
 				draw_tile(screen, x, y)
 			
 def draw_tile(screen, x, y):
-	col = TILE_COLOR
-	if (y < COLOR_CHANGE_Y):
-		col = TILE_COLOR_ALT
+	global current_color
+	global current_colorcount
+	col = TILE_COLOR_LIST[current_color] 
+	if current_color == 0 and current_colorcount == 9:
+		col = TILE_COLOR_LIST[current_color] 
+		current_color = current_color + 1
+		current_colorcount = current_colorcount - 1
+
+	elif current_color > 9 and current_colorcount > 0:
+		col = TILE_COLOR_LIST[current_color]
+		current_color = current_color + 1
+		current_colorcount = current_colorcount - 1
+
+	elif current_color == 9 and current_colorcount == 0:
+		col = TILE_COLOR_LIST[current_color]
+		current_color = current_color - 1
+		current_colorcount = current_colorcount + 1
+
 	pygame.draw.rect(screen, col, (x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
 	pygame.draw.rect(screen, (0, 0, 0), (x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT), 2)
 
