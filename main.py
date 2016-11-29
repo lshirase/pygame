@@ -14,20 +14,18 @@ BOARD_SIZE = BOARD_WIDTH, BOARD_HEIGHT
 SCREEN_WIDTH = 240
 SCREEN_HEIGHT = 400
 SCREEN_SIZE = SCREEN_WIDTH, SCREEN_HEIGHT 
-TILE_WIDTH = SCREEN_WIDTH / BOARD_WIDTH
-TILE_HEIGHT = SCREEN_HEIGHT / BOARD_HEIGHT
+TILE_WIDTH = 20
+TILE_HEIGHT = 20
 TILE_SIZE = TILE_WIDTH, TILE_HEIGHT
 
 
-TILE_COLOR_LIST = [(255, 204, 255), (253, 209, 254), (252, 215, 253), (251, 221, 253), (250, 226, 252), (249, 232, 252), (248, 238, 251), (247, 243, 251
-), (246, 249, 250)]
+TILE_COLOR_LIST_ONE= [(247, 202, 201), (237,209,210), (226,215,219), (216,222,228), (206,229,237), (195,235,246), (185,242,255)]
 
 
-LEVEL_SPEED = ( 80, 80, 75, 75, 70, 70, 65, 60, 55, 50,
-				45, 40, 35, 30, 32 )
+TILE_SPEED = ( 85, 85, 80, 80, 75, 75, 70, 70, 65, 63, 60, 55, 52, 50, 45, 40, 35, 30, 29, 28)
 
 				
-WIN_LEVEL = 15
+WIN_LEVEL = 20
 
 current_speed = 50 # Current tile speed in milliseconds
 board = []
@@ -37,8 +35,11 @@ current_y = BOARD_HEIGHT - 1
 old_y = current_y
 current_width = 3
 current_level = 0
-current_color = 0
-current_colorcount = 9
+col = (247, 202, 201)
+prevcol = 0
+counter = 0
+colorreverse = False
+
 
 
 	
@@ -96,7 +97,7 @@ def reset_game():
 	current_x = 0
 	current_y = BOARD_HEIGHT - 1
 	current_level = 0
-	current_speed = LEVEL_SPEED[current_level]
+	current_speed = TILE_SPEED[current_level]
 	current_width = 3
 
 
@@ -135,10 +136,10 @@ def game_status():
 	
 	if current_width == 0:
 		game = LOSE
-	# elif current_level == WIN_LEVEL:
-	# 	game = WIN
+	elif current_level == WIN_LEVEL:
+	 	game = WIN
 	else:
-		current_speed = LEVEL_SPEED[current_level]
+		current_speed = TILE_SPEED[current_level]
 
 
 last_time = 0
@@ -183,51 +184,98 @@ def update_board_info():
 	fill_current_row()
 	
 def draw_board(screen):
+	global counter, colorreverse
 	for x in range(BOARD_WIDTH):
 		for y in range(BOARD_HEIGHT):
 			if board[x][y] == 1:
 				draw_tile(screen, x, y)
+
+
 			
 def draw_tile(screen, x, y):
-	global current_color, current_colorcount
-	col = (255,0,0)
+	global colorreverse, counter, prevcol
+	if colorreverse == False:
+		try:
+			col = TILE_COLOR_LIST_ONE[prevcol + 1]
+		except:
+			colorreverse == True
+			col = TILE_COLOR_LIST_ONE[prevcol - 1]
+
+	else:
+		try:
+			col = TILE_COLOR_LIST_ONE[prevcol - 1]
+		except:
+			colorreverse == False
+			col = TILE_COLOR_LIST_ONE[prevcol + 1]
+
+
+
+
+
+	# counttemp = counter % 3
+	# if colorreverse == False:
+	# 	if counttemp == 6:
+	# 		col = TILE_COLOR_LIST_ONE[counttemp]
+	# 		colorreverse = True
+	# 	else:
+	# 		col = TILE_COLOR_LIST_ONE[counttemp]
+	# elif colorreverse == True:
+	# 	if counttemp == 0:
+	# 		col = TILE_COLOR_LIST_ONE[counttemp]
+	# 		colorreverse = False
+	# 	else:
+	# 		col = TILE_COLOR_LIST_ONE[counttemp]
+
+	# if colorreverse == False:
+	# 	counter = counter + 1
+	# else:
+	# 	counter = counter - 1
+
 
 	if y == BOARD_HEIGHT - 1:
-		col = TILE_COLOR_LIST[0]
+		col = TILE_COLOR_LIST_ONE[0]
 	elif y == BOARD_HEIGHT - 2:
-		col = TILE_COLOR_LIST[1]
+		col = TILE_COLOR_LIST_ONE[1]
 	elif y == BOARD_HEIGHT - 3:
-		col = TILE_COLOR_LIST[2]
+		col = TILE_COLOR_LIST_ONE[2]
 	elif y == BOARD_HEIGHT - 4:
-		col = TILE_COLOR_LIST[3]
+		col = TILE_COLOR_LIST_ONE[3]
 	elif y == BOARD_HEIGHT - 5:
-		col = TILE_COLOR_LIST[4]
+		col = TILE_COLOR_LIST_ONE[4]
 	elif y == BOARD_HEIGHT - 6:
-		col = TILE_COLOR_LIST[5]
+		col = TILE_COLOR_LIST_ONE[5]
 	elif y == BOARD_HEIGHT - 7:
-		col = TILE_COLOR_LIST[6]
+		col = TILE_COLOR_LIST_ONE[6]
 	elif y == BOARD_HEIGHT - 8:
-		col = TILE_COLOR_LIST[7]
+		col = TILE_COLOR_LIST_ONE[5]
 	elif y == BOARD_HEIGHT - 9:
-		col = TILE_COLOR_LIST[8]
-	elif y == BOARD_HEIGHT - 5:
-		col = TILE_COLOR_LIST[4]	
+		col = TILE_COLOR_LIST_ONE[4]
+	elif y == BOARD_HEIGHT - 10:
+		col = TILE_COLOR_LIST_ONE[3]
+	elif y == BOARD_HEIGHT - 11:
+		col = TILE_COLOR_LIST_ONE[2]
+	elif y == BOARD_HEIGHT - 12:
+		col = TILE_COLOR_LIST_ONE[1]
+	elif y == BOARD_HEIGHT - 13:
+		col = TILE_COLOR_LIST_ONE[0]
+
+
 	# if current_color == 0 and current_colorcount == 9:
-	# 	col = TILE_COLOR_LIST[current_color] 
+	# 	col = TILE_COLOR_LIST_ONE[current_color] 
 	# 	current_color = current_color + 1
 	# 	current_colorcount = current_colorcount - 1
 
 	# elif current_color < 8 and current_colorcount > 0:
-	# 	col = TILE_COLOR_LIST[current_color]
+	# 	col = TILE_COLOR_LIST_ONE[current_color]
 	# 	current_color = current_color + 1
 	# 	current_colorcount = current_colorcount - 1
 
 	# elif current_color == 8 and current_colorcount == 0:
-	# 	col = TILE_COLOR_LIST[current_color]
+	# 	col = TILE_COLOR_LIST_ONE[current_color]
 	# 	current_color = current_color - 1
 	# 	current_colorcount = current_colorcount + 1
 	# elif current_color > 0 and current_colorcount < 8:
-	# 	col = TILE_COLOR_LIST[current_color]
+	# 	col = TILE_COLOR_LIST_ONE[current_color]
 	# 	current_color = current_color - 1
 	# 	current_colorcount = current_colorcount + 1
 
