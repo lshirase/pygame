@@ -1,6 +1,7 @@
 import backgrounds
 import pygame
 from pygame.locals import *
+from pygame.mixer import *
 from backgrounds import *
 import os
 
@@ -35,6 +36,10 @@ current_level = 0
 current_color = 0
 current_colorcount = 9
 
+
+# goodsound = pygame.mixer.Sound('good.wav')
+
+
 INTRO = 0
 PLAYING = 1
 LOSE = 2
@@ -48,9 +53,11 @@ play = True
 
 def main():
 	global game, current_x, current_y, current_speed, play, current_width, current_level, current_color, current_colorcount
-	
+	# pygame.mixer.init()
 	pygame.init()
-	screen = pygame.display.set_mode( SCREEN_SIZE )	
+	screen = pygame.display.set_mode( SCREEN_SIZE )
+	# goodsound = pygame.mixer.Sound(os.path.join('sounds','good.wav'))
+	
 	
 	reset_game()
 
@@ -97,6 +104,7 @@ def key_hit():
 				if board[x][current_y + 1] == 0: # If they're standing on a block that did not work
 					current_width -= 1 # Then next time, give them one less block
 					board[x][current_y] = 0 # Also, get rid of this block that isn't standing on solid ground.
+		# goodsound.play()
 		current_y -= 1
 		current_level += 1
 		game_status()
