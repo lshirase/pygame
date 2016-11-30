@@ -133,18 +133,6 @@ def key_hit():
 	else:
 		play = False
 
-def win_lose():
-	global game_status, block_width, current_level, current_speed, play, TILE_COLOR
-	
-	if block_width == 0:
-		game_status= LOSE
-	elif current_level == WIN_LEVEL:
-	 	game_status= WIN
-	else:
-		current_speed = TILE_SPEED[current_level]
-
-
-last_time = 0
 def update_movement():
 	global game_status, last_time, x_position, y_position, block_width, current_speed, direction
 
@@ -158,6 +146,20 @@ def update_movement():
 			x_position += direction
 			
 			last_time = current_time
+
+def win_lose():
+	global game_status, block_width, current_level, current_speed, play, TILE_COLOR
+	
+	if block_width == 0:
+		game_status= LOSE
+	elif current_level == WIN_LEVEL:
+	 	game_status= WIN
+	else:
+		current_speed = TILE_SPEED[current_level]
+
+
+last_time = 0
+
 		
 def update_screen(screen):
 	global game
