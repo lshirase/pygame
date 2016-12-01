@@ -68,6 +68,7 @@ class Game(object):
 
 
 		while(self.play):
+			
 			self.movement()
 			self.update_board_info()
 			self.update_screen(self.screen)
@@ -265,5 +266,6 @@ class Game(object):
 if __name__ == '__main__':
     game = Game()
     game.main()
+
 pygame.quit()
 quit()		
