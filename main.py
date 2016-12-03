@@ -36,6 +36,16 @@ WIN = 3
 
 images = ( pygame.image.load(os.path.join('backgrounds', 'first.png')), pygame.image.load(os.path.join('backgrounds', 'main.png')), pygame.image.load(os.path.join('backgrounds', 'lose.png')), pygame.image.load(os.path.join('backgrounds', 'youwon.png')))
 
+class Scoreboard(pygame.sprite.Sprite):
+	def __init__(self):
+		pygame.sprite.Sprite.__init__(self)
+		self.rows = 20
+		self.font = pygame.font.SysFont("Helvetica", 18)
+        
+	def update(self):
+		self.text = "rows left %d" % (self.rows)
+		self.image = self.font.render(self.text, 1, (185,242,255))
+		self.rect = self.image.get_rect()
 
 
 class Game(object):
@@ -55,6 +65,8 @@ class Game(object):
 		self.play = True
 		self.game_status= INTRO
 
+
+
 	def main(self):
 
 		pygame.init()
@@ -63,20 +75,30 @@ class Game(object):
 		pygame.mixer.music.load(os.path.join('sounds', 'soundtrack.ogg'))
 		pygame.mixer.music.play(-1)
 
-		
 		self.reset_game()
-
+		scoreboard = Scoreboard()
+		scoreSprite = pygame.sprite.Group(scoreboard)
 
 		while(self.play):
+
+
 			
 			self.movement()
 			self.update_board_info()
-			self.update_screen(self.screen)
+			self.update_screen(self.screen,scoreSprite)
+			scoreSprite.update()
+			scoreSprite.draw(self.screen)
+
+
+
 			
 			for event in pygame.event.get():
 				if event.type == KEYDOWN:
 					if event.key == K_SPACE:
-						self.key_hit()
+						self.key_hit(scoreboard, scoreSprite)
+						pygame.display.flip()
+
+
 					##bug checking, makes it easier to check win state
 					if event.key == K_RETURN: 
 						self.x_position -= 1
@@ -85,6 +107,11 @@ class Game(object):
 						self.block_width += 1
 						if (self.block_width >= BOARD_WIDTH): 
 							self.block_width = BOARD_WIDTH - 1
+
+			
+
+
+
 
 
 
@@ -106,6 +133,7 @@ class Game(object):
 		self.clear_row(self.y_position)
 		self.fill_current_row()
 
+
 	def clear_row(self,y):
 		for x in range(BOARD_WIDTH):
 			self.board[x][y] = 0
@@ -115,7 +143,7 @@ class Game(object):
 		for x in range(self.x_position, self.x_position + self.block_width):
 			self.board[x][self.y_position] = 1
 
-	def update_screen(self,screen):
+	def update_screen(self,screen,scoreSprite):
 
 
 		self.screen.blit(images[self.game_status], (0,0,SCREEN_WIDTH,SCREEN_HEIGHT), (0,0,SCREEN_WIDTH,SCREEN_HEIGHT))
@@ -123,8 +151,15 @@ class Game(object):
 		if self.game_status== PLAYING:
 			if self.y_position < SCREEN_HEIGHT - 3:
 				self.screen.blit(images[self.game_status], (0,0,SCREEN_WIDTH,SCREEN_HEIGHT - 15), (0,0,SCREEN_WIDTH,SCREEN_HEIGHT - 15))
-
+				
+			scoreSprite.draw(self.screen)
 			self.draw_board(self.screen)
+	
+
+
+
+
+
 			
 
 		elif self.game_status== INTRO:
@@ -141,6 +176,10 @@ class Game(object):
 			for y in range(BOARD_HEIGHT):
 				if self.board[x][y] == 1:
 					self.draw_tile(self.screen, x, y)
+
+
+
+
 
 
 				
@@ -190,7 +229,7 @@ class Game(object):
 
 		pygame.draw.rect(self.screen, self.col, (x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
 		pygame.draw.rect(self.screen, (0, 0, 0), (x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT), 2)
-		
+
 
 	def reset_game(self):
 
@@ -207,7 +246,7 @@ class Game(object):
 		self.block_width = 3
 
 
-	def key_hit(self):
+	def key_hit(self,scoreboard, scoreSprite):
 
 		goodsound = pygame.mixer.Sound(os.path.join('sounds', 'good.ogg'))
 		badsound = pygame.mixer.Sound(os.path.join('sounds', 'bad.ogg'))
@@ -226,10 +265,12 @@ class Game(object):
 			else:
 				badsound.play()
 			self.y_position -= 1
+			scoreboard.rows -=1
 			self.current_level += 1
 			self.win_lose()
 			if self.game_status== LOSE:
 				losesound.play()
+				scoreboard.rows = WIN_LEVEL
 		elif self.game_status== INTRO:
 			self.game_status= PLAYING
 		elif self.game_status== LOSE:
@@ -237,6 +278,7 @@ class Game(object):
 			self.game_status= INTRO
 		else:
 			self.play = False
+
 
 
 
@@ -264,8 +306,8 @@ class Game(object):
 
 
 if __name__ == '__main__':
-    game = Game()
-    game.main()
+     game = Game()
+     game.main()
 
 pygame.quit()
 quit()		
